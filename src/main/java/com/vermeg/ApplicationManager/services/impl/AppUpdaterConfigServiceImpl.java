@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppUpdaterConfigServiceImpl implements AppUpdaterConfigService{
 
-    AppUpdaterConfigRepository appUpdaterConfigServiceRepository;
+    private AppUpdaterConfigRepository appUpdaterConfigServiceRepository;
 
     @Autowired
     public AppUpdaterConfigServiceImpl(AppUpdaterConfigRepository appUpdaterConfigServiceRepository) {

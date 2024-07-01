@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/virtualMachine")
 public class VirtualMachineController {
 
-    VirtualMachineService virtualMachineService;
+    private VirtualMachineService virtualMachineService;
 
     @Autowired
     public VirtualMachineController(VirtualMachineService virtualMachineService) {

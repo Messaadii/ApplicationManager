@@ -11,22 +11,22 @@ import java.util.List;
 @Entity
 public class AppUpdaterConfig {
     @Id
-    String name ;
+    private String name ;
 
     @OneToMany(mappedBy = "appUpdaterConfigBefore",cascade = CascadeType.ALL)
-    List<Command> beforeUpdateCommands ;
+    private List<Command> beforeUpdateCommands ;
 
     @OneToMany(mappedBy = "appUpdaterConfigAfter", cascade = CascadeType.ALL)
-    List<Command> afterUpdateCommands ;
+    private List<Command> afterUpdateCommands ;
 
     @OneToMany(mappedBy = "appUpdaterConfig", cascade = CascadeType.ALL)
-    List<ApplicationFile> applicationFiles;
+    private List<ApplicationFile> applicationFiles;
 
     @OneToOne(mappedBy = "appUpdaterConfig", cascade = CascadeType.ALL)
-    Resource toBeDeployed;
+    private Resource toBeDeployed;
 
     @OneToOne(cascade = CascadeType.ALL)
-    VirtualMachineResource deployOn;
+    private VirtualMachineResource deployOn;
 
     public void deploy() throws JSchException, IOException, SftpException {
         try(EarDeployer earDeployer = new EarDeployer(this)){

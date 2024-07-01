@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class VirtualMachineServiceImpl implements VirtualMachineService {
 
-    VirtualMachineRepository virtualMachineRepository;
+    private VirtualMachineRepository virtualMachineRepository;
 
     @Autowired
     public VirtualMachineServiceImpl(VirtualMachineRepository virtualMachineRepository) {
