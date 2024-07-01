@@ -27,7 +27,8 @@ public abstract class Resource {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToOne
-    private AppUpdaterConfig appUpdaterConfig;
+    private AppUpdaterConfig toBeDeployedAUC;
+
     public abstract String getEarCommand(String destinationPath) throws IOException;
 
     public abstract String getFileName();
@@ -40,11 +41,11 @@ public abstract class Resource {
         this.id = id;
     }
 
-    public AppUpdaterConfig getAppUpdaterConfig() {
-        return appUpdaterConfig;
+    public AppUpdaterConfig getToBeDeployedAUC() {
+        return toBeDeployedAUC;
     }
 
-    public void setAppUpdaterConfig(AppUpdaterConfig appUpdaterConfig) {
-        this.appUpdaterConfig = appUpdaterConfig;
+    public void setToBeDeployedAUC(AppUpdaterConfig toBeDeployedAUC) {
+        this.toBeDeployedAUC = toBeDeployedAUC;
     }
 }

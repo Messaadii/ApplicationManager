@@ -22,17 +22,14 @@ public class AppUpdaterConfig {
     @OneToMany(mappedBy = "appUpdaterConfig", cascade = CascadeType.ALL)
     private List<ApplicationFile> applicationFiles;
 
-    @OneToOne(mappedBy = "appUpdaterConfig", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "toBeDeployedAUC", cascade = CascadeType.ALL)
     private Resource toBeDeployed;
 
     @OneToOne(cascade = CascadeType.ALL)
     private VirtualMachineResource deployOn;
 
-    public void deploy() throws JSchException, IOException, SftpException {
-        try(EarDeployer earDeployer = new EarDeployer(this)){
-            earDeployer.deploy(this);
-        }
-    }
+    @OneToMany(mappedBy = "appUpdaterConfig" , cascade = CascadeType.REMOVE)
+    private List<UpdateResult> updateResults;
 
     public String getName() {
         return name;
@@ -58,7 +55,7 @@ public class AppUpdaterConfig {
     }
 
     public void setToBeDeployed(Resource toBeDeployed) {
-        toBeDeployed.setAppUpdaterConfig(this);
+        toBeDeployed.setToBeDeployedAUC(this);
         this.toBeDeployed = toBeDeployed;
     }
 
@@ -90,5 +87,16 @@ public class AppUpdaterConfig {
             command.setAppUpdaterConfigAfter(this);
         }
         this.afterUpdateCommands = afterUpdateCommands;
+    }
+
+    public List<UpdateResult> getUpdateResults() {
+        return updateResults;
+    }
+
+    public void setUpdateResults(List<UpdateResult> updateResults) {
+        for (UpdateResult updateResult : updateResults){
+            updateResult.setAppUpdaterConfig(this);
+        }
+        this.updateResults = updateResults;
     }
 }
