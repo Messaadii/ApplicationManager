@@ -23,11 +23,11 @@ import java.io.IOException;
 public abstract class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToOne
-    AppUpdaterConfig appUpdaterConfig;
+    private AppUpdaterConfig appUpdaterConfig;
     public abstract String getEarCommand(String destinationPath) throws IOException;
 
     public abstract String getFileName();

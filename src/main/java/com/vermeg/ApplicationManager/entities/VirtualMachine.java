@@ -9,18 +9,18 @@ import java.util.List;
 @Entity
 public class VirtualMachine {
     @Id
-    String name;
-    String host;
-    String user;
+    private String name;
+    private String host;
+    private String user;
     @ColumnTransformer(
             read = "CAST(AES_DECRYPT(FROM_BASE64(password), 'encryption_key') AS CHAR(255))",
             write = "TO_BASE64(AES_ENCRYPT(?, 'encryption_key'))"
     )
-    String password;
-    int port;
+    private String password;
+    private int port;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "virtualMachine")
-    List<VirtualMachineResource> virtualMachineResources;
+    private List<VirtualMachineResource> virtualMachineResources;
 
     public int getPort() {
         return port;

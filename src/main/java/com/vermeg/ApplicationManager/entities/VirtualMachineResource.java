@@ -7,14 +7,14 @@ import jakarta.persistence.*;
 @Entity
 @DiscriminatorValue("VirtualMachineResource")
 public class VirtualMachineResource extends Resource {
-    String earPath;
-    String tempPath;
-    String backupFolderPath;
+    private String earPath;
+    private String tempPath;
+    private String backupFolderPath;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToOne(mappedBy = "deployOn" )
-    AppUpdaterConfig appUpdaterConfig;
+    private AppUpdaterConfig appUpdaterConfig;
     @ManyToOne
-    VirtualMachine virtualMachine;
+    private VirtualMachine virtualMachine;
 
     @Override
     public String getEarCommand(String destinationPath) {

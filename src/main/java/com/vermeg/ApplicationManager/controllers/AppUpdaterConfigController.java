@@ -13,7 +13,7 @@ import java.io.IOException;
 @RequestMapping("/appUpdaterConfig")
 public class AppUpdaterConfigController {
 
-    AppUpdaterConfigService appUpdaterConfigService;
+    private AppUpdaterConfigService appUpdaterConfigService;
 
     @Autowired
     public AppUpdaterConfigController(AppUpdaterConfigService appUpdaterConfigService) {

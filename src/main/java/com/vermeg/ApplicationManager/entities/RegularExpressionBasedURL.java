@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 @Entity
 @DiscriminatorValue("RegularExpressionBasedURL")
 public class RegularExpressionBasedURL extends URLBased{
-   String RegularExpression ;
+    private String RegularExpression ;
 
     public String getRegularExpression() {
         return RegularExpression;
