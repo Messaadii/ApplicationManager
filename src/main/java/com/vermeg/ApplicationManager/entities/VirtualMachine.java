@@ -1,0 +1,72 @@
+package com.vermeg.ApplicationManager.entities;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnTransformer;
+
+import java.util.List;
+
+@Entity
+public class VirtualMachine {
+    @Id
+    String name;
+    String host;
+    String user;
+    @ColumnTransformer(
+            read = "CAST(AES_DECRYPT(FROM_BASE64(password), 'encryption_key') AS CHAR(255))",
+            write = "TO_BASE64(AES_ENCRYPT(?, 'encryption_key'))"
+    )
+    String password;
+    int port;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @OneToMany(mappedBy = "virtualMachine")
+    List<VirtualMachineResource> virtualMachineResources;
+
+    public int getPort() {
+        return port;
+    }
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public List<VirtualMachineResource> getVirtualMachineResources() {
+        return virtualMachineResources;
+    }
+
+    public void setVirtualMachineResources(List<VirtualMachineResource> virtualMachineResources) {
+        this.virtualMachineResources = virtualMachineResources;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+}
