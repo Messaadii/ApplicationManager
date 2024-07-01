@@ -33,7 +33,7 @@ public class EarDeployer implements AutoCloseable {
         executeCommand(cmd);
     }
 
-    private void executeCommand(String cmd ) throws JSchException, IOException {
+    private void executeCommand(String cmd) throws JSchException, IOException {
         System.out.println("The command (" + cmd + ") is being executed");
 
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
