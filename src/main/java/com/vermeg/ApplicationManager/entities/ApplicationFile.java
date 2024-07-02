@@ -10,7 +10,7 @@ public class ApplicationFile {
     private Integer id;
     private String path ;
 
-    @Lob // This annotation specifies that the attribute will be stored as a large object (BLOB or CLOB) in the database
+    @Lob
     @Column(columnDefinition = "BLOB")
     private byte[] newValue ;
 

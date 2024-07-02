@@ -3,6 +3,9 @@ package com.vermeg.ApplicationManager.controllers;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.vermeg.ApplicationManager.entities.AppUpdaterConfig;
+import com.vermeg.ApplicationManager.entities.UpdateResult;
+import com.vermeg.ApplicationManager.entities.UpdateStatus;
+import com.vermeg.ApplicationManager.helpers.EarDeployer;
 import com.vermeg.ApplicationManager.services.AppUpdaterConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +34,16 @@ public class AppUpdaterConfigController {
     }
 
     @GetMapping("/deploy/{name}")
-    public void getAppUpdaterConfigService(@PathVariable String name) throws JSchException, IOException, SftpException {
-        appUpdaterConfigService.getAppUpdaterConfigByName(name).deploy();
-        System.out.println("i am here");
+    public UpdateResult getAppUpdaterConfigService(@PathVariable String name) {
+        AppUpdaterConfig appUpdaterConfig = appUpdaterConfigService.getAppUpdaterConfigByName(name);
+        EarDeployer earDeployer = null;
+        try {
+            earDeployer = new EarDeployer(appUpdaterConfig);
+            earDeployer.deploy();
+        } catch (Exception e) {
+            earDeployer.getUpdateResult().appendLog(e.getMessage());
+            earDeployer.getUpdateResult().setStatus(UpdateStatus.FAILED);
+        }
+        return earDeployer.getUpdateResult();
     }
 }
