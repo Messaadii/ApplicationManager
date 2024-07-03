@@ -6,6 +6,8 @@ import com.vermeg.ApplicationManager.services.AppUpdaterConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class AppUpdaterConfigServiceImpl implements AppUpdaterConfigService{
@@ -29,5 +31,15 @@ public class AppUpdaterConfigServiceImpl implements AppUpdaterConfigService{
     @Override
     public AppUpdaterConfig getAppUpdaterConfigByName(String name) {
         return appUpdaterConfigServiceRepository.findByName(name);
+    }
+
+    @Override
+    public List<AppUpdaterConfig> getAllAppUpdaterConfigs() {
+        return appUpdaterConfigServiceRepository.findAll();
+    }
+
+    @Override
+    public void deleteAppUpdaterConfig(String name) {
+        appUpdaterConfigServiceRepository.delete(appUpdaterConfigServiceRepository.findByName(name));
     }
 }

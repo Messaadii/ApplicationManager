@@ -3,6 +3,7 @@ package com.vermeg.ApplicationManager.entities;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnTransformer;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
@@ -16,10 +17,11 @@ public class VirtualMachine {
             read = "CAST(AES_DECRYPT(FROM_BASE64(password), 'encryption_key') AS CHAR(255))",
             write = "TO_BASE64(AES_ENCRYPT(?, 'encryption_key'))"
     )
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private int port;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @OneToMany(mappedBy = "virtualMachine")
+    @OneToMany(mappedBy = "virtualMachine",cascade = CascadeType.ALL ,orphanRemoval = true)
     private List<VirtualMachineResource> virtualMachineResources;
 
     public int getPort() {
