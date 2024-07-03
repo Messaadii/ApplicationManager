@@ -5,8 +5,10 @@ import com.vermeg.ApplicationManager.services.VirtualMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/virtualMachine")
+@RequestMapping("/virtual-machine")
 public class VirtualMachineController {
 
     private VirtualMachineService virtualMachineService;
@@ -23,6 +25,23 @@ public class VirtualMachineController {
 
     @PostMapping("/save")
     public VirtualMachine save(@RequestBody VirtualMachine virtualMachine) {
+        return virtualMachineService.create(virtualMachine);
+    }
+
+    @GetMapping("/getAll")
+    public List<VirtualMachine> getAllVirtualMachines() {
+        return virtualMachineService.getAllVirtualMachines();
+    }
+
+    // delete virtual machine
+    @DeleteMapping("/delete/{name}")
+    public void deleteVirtualMachine(@PathVariable String name) {
+        virtualMachineService.deleteVirtualMachine(name);
+    }
+
+    // update virtual machine
+    @PutMapping("/update")
+    public VirtualMachine updateVirtualMachine(@RequestBody VirtualMachine virtualMachine) {
         return virtualMachineService.create(virtualMachine);
     }
 }
