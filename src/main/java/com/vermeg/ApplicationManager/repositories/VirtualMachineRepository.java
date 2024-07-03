@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface VirtualMachineRepository extends JpaRepository<VirtualMachine, Long>{
     VirtualMachine getVirtualMachineByName(String name);
 
+    VirtualMachine findByName(String name);
 }

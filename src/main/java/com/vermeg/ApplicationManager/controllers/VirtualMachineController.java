@@ -44,4 +44,9 @@ public class VirtualMachineController {
     public VirtualMachine updateVirtualMachine(@RequestBody VirtualMachine virtualMachine) {
         return virtualMachineService.create(virtualMachine);
     }
+
+    @GetMapping("/list-active-java-processes/{name}")
+    public List<String> listActiveJavaProcesses(@PathVariable String name) {
+        return virtualMachineService.listActiveJavaProcesses(name);
+    }
 }
