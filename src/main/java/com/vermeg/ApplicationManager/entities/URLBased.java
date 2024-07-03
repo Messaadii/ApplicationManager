@@ -7,7 +7,7 @@ import java.io.IOException;
 @Entity
 @DiscriminatorValue("URLBased")
 public class URLBased extends Resource{
-    String url;
+    private String url;
 
     @Override
     public String getEarCommand(String destinationPath) throws IOException {

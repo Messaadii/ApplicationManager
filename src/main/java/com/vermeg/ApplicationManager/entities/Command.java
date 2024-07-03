@@ -8,16 +8,16 @@ public class Command {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
-    String command ;
-    Boolean runAsRoot ;
+    private Integer id;
+    private String command ;
+    private Boolean runAsRoot ;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne
-    AppUpdaterConfig appUpdaterConfigBefore;
+    private AppUpdaterConfig appUpdaterConfigBefore;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne
-    AppUpdaterConfig appUpdaterConfigAfter;
+    private AppUpdaterConfig appUpdaterConfigAfter;
 
     public String getCommand() {
         return command;

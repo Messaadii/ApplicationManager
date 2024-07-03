@@ -7,15 +7,16 @@ import jakarta.persistence.*;
 public class ApplicationFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
-    String path ;
+    private Integer id;
+    private String path ;
 
-    @Lob // This annotation specifies that the attribute will be stored as a large object (BLOB or CLOB) in the database
+    @Lob
     @Column(columnDefinition = "BLOB")
-    byte[] newValue ;
+    private byte[] newValue ;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne
-    AppUpdaterConfig appUpdaterConfig;
+    private AppUpdaterConfig appUpdaterConfig;
 
     public String getPath() {
         return path;
