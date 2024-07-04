@@ -35,4 +35,5 @@ public class AppUpdaterConfigController {
         appUpdaterConfigService.getAppUpdaterConfigByName(name).deploy();
         System.out.println("i am here");
     }
+
 }

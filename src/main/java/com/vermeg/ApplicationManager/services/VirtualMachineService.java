@@ -8,4 +8,6 @@ public interface VirtualMachineService {
     VirtualMachine create(VirtualMachine virtualMachine);
     VirtualMachine getVirtualMachine(String name);
     List<String> listActiveJavaProcesses(String name );
+
+    List<VirtualMachine> findAll();
 }

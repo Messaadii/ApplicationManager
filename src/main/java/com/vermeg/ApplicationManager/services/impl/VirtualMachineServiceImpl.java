@@ -72,5 +72,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
         return Collections.singletonList(output.toString());
     }
+
+    @Override
+    public List<VirtualMachine> findAll() {
+        return virtualMachineRepository.findAll();
+    }
 }
 

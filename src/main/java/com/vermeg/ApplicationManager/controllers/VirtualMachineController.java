@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/virtualMachine")
+@CrossOrigin()
 public class VirtualMachineController {
 
     VirtualMachineService virtualMachineService;
@@ -31,4 +32,9 @@ public class VirtualMachineController {
     public List<String> listActiveJavaProcesses(@PathVariable String name) {
         return virtualMachineService.listActiveJavaProcesses(name);
     }
+    @GetMapping("/find-all")
+    public List<VirtualMachine> findAll(){
+        return virtualMachineService.findAll();
+    }
+
 }
