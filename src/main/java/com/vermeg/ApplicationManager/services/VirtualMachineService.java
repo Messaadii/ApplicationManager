@@ -13,4 +13,6 @@ public interface VirtualMachineService {
     void deleteVirtualMachine(String name);
 
     List<String> listActiveJavaProcesses(String name );
+
+    List<VirtualMachine> findAll();
 }

@@ -64,4 +64,5 @@ public class AppUpdaterConfigController {
         }
         return earDeployer.getUpdateResult();
     }
+
 }
