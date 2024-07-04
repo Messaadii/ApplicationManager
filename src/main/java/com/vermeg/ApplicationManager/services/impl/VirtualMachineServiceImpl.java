@@ -9,6 +9,8 @@ import com.vermeg.ApplicationManager.services.VirtualMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import java.util.List;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Collections;
@@ -19,7 +21,7 @@ import java.util.Properties;
 @Service
 public class VirtualMachineServiceImpl implements VirtualMachineService {
 
-    VirtualMachineRepository virtualMachineRepository;
+    private VirtualMachineRepository virtualMachineRepository;
 
     @Autowired
     public VirtualMachineServiceImpl(VirtualMachineRepository virtualMachineRepository) {
@@ -34,6 +36,18 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VirtualMachine getVirtualMachine( String name) {
         return virtualMachineRepository.getVirtualMachineByName(name);
     }
+
+
+    @Override
+    public List<VirtualMachine> getAllVirtualMachines() {
+        return virtualMachineRepository.findAll();
+    }
+
+    @Override
+    public void deleteVirtualMachine(String name) {
+        virtualMachineRepository.delete(virtualMachineRepository.getVirtualMachineByName(name));
+    }
+
     @Override
     public List<String> listActiveJavaProcesses(String name){
         VirtualMachine vm = virtualMachineRepository.findByName(name);
