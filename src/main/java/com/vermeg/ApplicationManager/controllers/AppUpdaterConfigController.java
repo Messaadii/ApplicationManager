@@ -8,6 +8,7 @@ import com.vermeg.ApplicationManager.entities.UpdateStatus;
 import com.vermeg.ApplicationManager.entities.VirtualMachine;
 import com.vermeg.ApplicationManager.helpers.EarDeployer;
 import com.vermeg.ApplicationManager.services.AppUpdaterConfigService;
+import com.vermeg.ApplicationManager.services.UpdateResultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +22,12 @@ public class AppUpdaterConfigController {
 
     private AppUpdaterConfigService appUpdaterConfigService;
 
+    private UpdateResultController updateResultController ;
+
     @Autowired
-    public AppUpdaterConfigController(AppUpdaterConfigService appUpdaterConfigService) {
+    public AppUpdaterConfigController(AppUpdaterConfigService appUpdaterConfigService, UpdateResultController updateResultController) {
         this.appUpdaterConfigService = appUpdaterConfigService;
+        this.updateResultController = updateResultController;
     }
 
     @GetMapping("/get/{name}")
@@ -62,6 +66,7 @@ public class AppUpdaterConfigController {
             earDeployer.getUpdateResult().appendLog(e.getMessage());
             earDeployer.getUpdateResult().setStatus(UpdateStatus.FAILED);
         }
+        this.updateResultController.save(earDeployer.getUpdateResult());
         return earDeployer.getUpdateResult();
     }
 

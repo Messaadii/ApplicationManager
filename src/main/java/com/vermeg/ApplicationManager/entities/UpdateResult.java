@@ -12,6 +12,7 @@ public class UpdateResult {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Integer id;
     private Date executionDate;
 
@@ -20,7 +21,6 @@ public class UpdateResult {
     private String log;
     private UpdateStatus status;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne
     private AppUpdaterConfig appUpdaterConfig;
 
@@ -28,6 +28,9 @@ public class UpdateResult {
         this.executionDate = executionDate;
         this.status = status;
         this.log = "";
+    }
+
+    public UpdateResult() {
     }
 
     public Integer getId() {

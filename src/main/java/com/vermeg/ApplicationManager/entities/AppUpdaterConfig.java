@@ -1,5 +1,6 @@
 package com.vermeg.ApplicationManager.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.vermeg.ApplicationManager.helpers.EarDeployer;
@@ -28,6 +29,7 @@ public class AppUpdaterConfig {
     @OneToOne(cascade = CascadeType.ALL)
     private VirtualMachineResource deployOn;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "appUpdaterConfig" , cascade = CascadeType.REMOVE)
     private List<UpdateResult> updateResults;
 
