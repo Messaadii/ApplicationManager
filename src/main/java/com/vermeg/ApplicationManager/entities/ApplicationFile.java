@@ -1,5 +1,6 @@
 package com.vermeg.ApplicationManager.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
@@ -7,11 +8,12 @@ import jakarta.persistence.*;
 public class ApplicationFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    @Column(name = "id_")
     private Integer id;
+    @Column(name = "path_")
     private String path ;
-
-    @Lob
-    @Column(columnDefinition = "BLOB")
+    @Column(name = "newValue_")
     private byte[] newValue ;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
