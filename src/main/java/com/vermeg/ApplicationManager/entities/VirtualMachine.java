@@ -23,7 +23,7 @@ public class VirtualMachine {
     @Column(name = "port_")
     private int port;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @OneToMany(mappedBy = "virtualMachine",cascade = CascadeType.ALL ,orphanRemoval = true)
+    @OneToMany(mappedBy = "virtualMachine")
     private List<VirtualMachineResource> virtualMachineResources;
 
     public int getPort() {

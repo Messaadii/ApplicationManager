@@ -34,7 +34,7 @@ public class RegularExpressionBasedURL extends URLBased{
 
         List<String> matches = new ArrayList<>();
         while (matcher.find()) {
-            matches.add(matcher.group());
+            matches.add(matcher.group(1) + ".ear");
         }
         matches.sort(String::compareTo);
         return matches.getLast();

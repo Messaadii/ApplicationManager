@@ -58,9 +58,9 @@ public class AppUpdaterConfigController {
     @GetMapping("/deploy/{name}")
     public UpdateResult getAppUpdaterConfigService(@PathVariable String name) {
         AppUpdaterConfig appUpdaterConfig = appUpdaterConfigService.getAppUpdaterConfigByName(name);
-        EarDeployer earDeployer = null;
+        EarDeployer earDeployer = new EarDeployer(appUpdaterConfig);
         try {
-            earDeployer = new EarDeployer(appUpdaterConfig);
+            earDeployer.init();
             earDeployer.deploy();
         } catch (Exception e) {
             earDeployer.getUpdateResult().appendLog(e.getMessage());

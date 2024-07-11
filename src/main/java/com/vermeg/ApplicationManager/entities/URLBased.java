@@ -13,7 +13,7 @@ public class URLBased extends Resource{
     @Override
     public String getEarCommand(String destinationPath) throws IOException {
         destinationPath.substring(0, destinationPath.lastIndexOf("/") );
-        return "wget -P " + destinationPath + " " + commandUrl() + " \n";
+        return "wget -O " + destinationPath + " " + commandUrl() + " \n";
     }
 
     @Override

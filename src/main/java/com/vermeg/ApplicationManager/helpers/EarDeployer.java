@@ -11,16 +11,18 @@ import java.util.*;
 
 public class EarDeployer implements AutoCloseable {
 
-    private final Session session;
+    private Session session;
     private final Set<String> jarFiles = new HashSet<>();
     private final Set<String> warFiles = new HashSet<>();
     private final UpdateResult updateResult = new UpdateResult(new Date(), UpdateStatus.UPDATED);
     private AppUpdaterConfig appUpdaterConfig;
 
-    public EarDeployer(AppUpdaterConfig appUpdaterConfig) throws JSchException {
+    public EarDeployer(AppUpdaterConfig appUpdaterConfig){
         this.appUpdaterConfig = appUpdaterConfig;
         updateResult.setAppUpdaterConfig(appUpdaterConfig);
+    }
 
+    public void init() throws JSchException {
         JSch jsch = new JSch();
         session = jsch.getSession(appUpdaterConfig.getDeployOn().getVirtualMachine().getUser()
                 , appUpdaterConfig.getDeployOn().getVirtualMachine().getHost()
@@ -36,12 +38,12 @@ public class EarDeployer implements AutoCloseable {
         session.connect();
     }
 
-    private void executeCommand(String givenCmd,boolean runAsRoot ,String password,String... args) throws JSchException, IOException {
+    private void executeCommand(String givenCmd,boolean runAsRoot ,String password,String... args) throws JSchException, IOException, InterruptedException {
         String cmd = String.format(givenCmd, args);
         executeCommand(cmd,runAsRoot,password);
     }
 
-    private void executeCommand(String cmd,boolean runAsRoot ,String password) throws JSchException, IOException {
+    private void executeCommand(String cmd,boolean runAsRoot, String password) throws JSchException, IOException, InterruptedException {
         updateResult.appendLog( runAsRoot ? "[sudo] " + cmd : cmd , "CMD");
 
         if (runAsRoot) cmd = String.format("echo '%s' | sudo -S sh -c '%s'",password,cmd);
@@ -49,23 +51,31 @@ public class EarDeployer implements AutoCloseable {
         ChannelExec channel = (ChannelExec) session.openChannel("exec");
         channel.setCommand(cmd);
 
-        InputStream input = channel.getInputStream();
-        InputStream err = channel.getErrStream();
-
         channel.connect();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-             BufferedReader errorReader = new BufferedReader(new InputStreamReader(err))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                updateResult.appendLog("\t" + line.trim());
-            }
-            while ((line = errorReader.readLine()) != null) {
-                updateResult.appendLog("\t" + line.trim());
-            }
-        }
+        Thread inputStream = readLog(channel.getInputStream());
+        Thread errorStream = readLog(channel.getErrStream());
+
+        inputStream.join();
+        errorStream.join();
+
         updateResult.breakLine();
         channel.disconnect();
+    }
+
+    private Thread readLog(InputStream input) {
+        Thread thread = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    updateResult.appendLog("\t" + line.trim());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
+        return thread;
     }
 
     private void writeFile(ApplicationFile applicationFile, String targetFilePath) throws IOException, JSchException, SftpException {
@@ -82,7 +92,7 @@ public class EarDeployer implements AutoCloseable {
         sftpChannel.exit();
     }
 
-    private void executeCommands(List<Command> commands , String password) throws JSchException, IOException {
+    private void executeCommands(List<Command> commands , String password) throws JSchException, IOException, InterruptedException {
         if (commands.isEmpty()) return;
         updateResult.appendLog("Executing user commands", "INFO");
         for (Command command : commands) {
@@ -91,7 +101,7 @@ public class EarDeployer implements AutoCloseable {
     }
 
 
-    private void updateFolder(ApplicationFile applicationFile,AppUpdaterConfig appUpdaterConfig,String earName ,Set<String> archiveFiles ,final String tempFolder ,final String extension, String newFileName) throws IOException, JSchException, SftpException {
+    private void updateFolder(ApplicationFile applicationFile,AppUpdaterConfig appUpdaterConfig,String earName ,Set<String> archiveFiles ,final String tempFolder ,final String extension, String newFileName) throws IOException, JSchException, SftpException, InterruptedException {
         String archivePath = appUpdaterConfig.getDeployOn().getTempPath() + "/tempFolder/" +
                 applicationFile.getPath().substring(0,
                         applicationFile.getPath().indexOf(extension) + 4);
@@ -110,7 +120,7 @@ public class EarDeployer implements AutoCloseable {
         writeFile(applicationFile, appUpdaterConfig.getDeployOn().getTempPath() + "/" + tempFolderArchive + "/" + archiveFolderName + "/" + newFileName);
     }
 
-    private void packageArchive(AppUpdaterConfig appUpdaterConfig,Set<String> archiveFiles , final String extension) throws JSchException, IOException {
+    private void packageArchive(AppUpdaterConfig appUpdaterConfig,Set<String> archiveFiles , final String extension) throws JSchException, IOException, InterruptedException {
         String tempFolderArchive = extension.equals(".jar") ? "tempFolderJar" : "tempFolderWar";
         for (String archive : archiveFiles) {
             updateResult.appendLog("Zipping the " + archive + extension, "INFO");
@@ -124,7 +134,7 @@ public class EarDeployer implements AutoCloseable {
         }
     }
 
-    private void updateFile(ApplicationFile applicationFile, String earName) throws IOException, JSchException, SftpException {
+    private void updateFile(ApplicationFile applicationFile, String earName) throws IOException, JSchException, SftpException, InterruptedException {
         AppUpdaterConfig appUpdaterConfig = applicationFile.getAppUpdaterConfig();
         String newFileName = applicationFile.getPath().contains("/") ?
                 applicationFile.getPath().substring(applicationFile.getPath().lastIndexOf("/") + 1)
@@ -140,7 +150,7 @@ public class EarDeployer implements AutoCloseable {
     }
 
 
-    public void deploy() throws IOException, JSchException, SftpException {
+    public void deploy() throws IOException, JSchException, SftpException, InterruptedException {
         executeCommands(appUpdaterConfig.getBeforeUpdateCommands()
                 ,appUpdaterConfig.getDeployOn().getVirtualMachine().getPassword());
 
