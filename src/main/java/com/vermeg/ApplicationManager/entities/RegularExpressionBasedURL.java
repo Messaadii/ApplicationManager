@@ -13,18 +13,19 @@ import java.util.regex.Pattern;
 @Entity
 @DiscriminatorValue("RegularExpressionBasedURL")
 public class RegularExpressionBasedURL extends URLBased{
-    private String RegularExpression ;
+    @Column(name = "regularExpression_")
+    private String regularExpression;
 
     public String getRegularExpression() {
-        return RegularExpression;
+        return regularExpression;
     }
 
     public void setRegularExpression(String regularExpression) {
-        RegularExpression = regularExpression;
+        this.regularExpression = regularExpression;
     }
 
     @Override
-    public String getUrl() throws IOException {
+    public String commandUrl() throws IOException {
         Document doc = Jsoup.connect(getUrl()).get();
         String input = doc.html();
 

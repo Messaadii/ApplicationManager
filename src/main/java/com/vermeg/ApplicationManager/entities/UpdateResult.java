@@ -1,5 +1,6 @@
 package com.vermeg.ApplicationManager.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
@@ -12,13 +13,16 @@ public class UpdateResult {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "id_")
+    @JsonIgnore
     private Integer id;
+    @Column(name = "executionDate_")
     private Date executionDate;
 
     @Lob
-    @Column(columnDefinition = "BLOB")
-    private String log;
+    @Column(name = "log_")
+    private byte [] log;
+    @Column(name = "status_")
     private UpdateStatus status;
 
     @ManyToOne
@@ -27,7 +31,7 @@ public class UpdateResult {
     public UpdateResult(Date executionDate , UpdateStatus status) {
         this.executionDate = executionDate;
         this.status = status;
-        this.log = "";
+        log = new byte[0];
     }
 
     public UpdateResult() {
@@ -50,11 +54,11 @@ public class UpdateResult {
     }
 
     public String getLog() {
-        return log;
+        return new String(log);
     }
 
     public void setLog(String log) {
-        this.log = log;
+        this.log = log.getBytes();
     }
 
     public AppUpdaterConfig getAppUpdaterConfig() {
@@ -77,11 +81,11 @@ public class UpdateResult {
      if(line.trim().isEmpty()){
             return;
         }
-        this.log += line + "\n";
+        setLog(getLog() + line + "\n");
     }
 
     public void breakLine() {
-        this.log += "\n";
+        setLog(getLog() + "\n");
     }
 
     public void appendLog(String line,String type){
@@ -92,6 +96,6 @@ public class UpdateResult {
         if(line.trim().isEmpty()){
             return;
         }
-        this.log += formattedDate + " | " + type + ": " + line + "\n";
+        setLog(getLog() + formattedDate + " | " + type + ": " + line + "\n");
     }
 }

@@ -7,8 +7,11 @@ import jakarta.persistence.*;
 @Entity
 @DiscriminatorValue("VirtualMachineResource")
 public class VirtualMachineResource extends Resource {
+    @Column(name = "earPath_")
     private String earPath;
+    @Column(name = "tempPath_")
     private String tempPath;
+    @Column(name = "backupFolderPath_")
     private String backupFolderPath;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToOne(mappedBy = "deployOn" )
