@@ -12,8 +12,7 @@ import java.util.*;
 public class EarDeployer implements AutoCloseable {
 
     private Session session;
-    private final Set<String> jarFiles = new HashSet<>();
-    private final Set<String> warFiles = new HashSet<>();
+    private final Set<String> archives = new HashSet<>();
     private final UpdateResult updateResult = new UpdateResult(new Date(), UpdateStatus.UPDATED);
     private AppUpdaterConfig appUpdaterConfig;
 
@@ -78,15 +77,17 @@ public class EarDeployer implements AutoCloseable {
         return thread;
     }
 
-    private void writeFile(ApplicationFile applicationFile, String targetFilePath) throws IOException, JSchException, SftpException {
+    private void writeFile(ApplicationFile applicationFile) throws IOException, JSchException, SftpException {
         ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
 
         sftpChannel.connect();
 
+        String targetFile = appUpdaterConfig.getDeployOn().getTempPath() + "/ear/"
+                + applicationFile.getPath();
         // Transfer the file
         try (InputStream inputStream = new ByteArrayInputStream(applicationFile.getNewValue())) {
-            updateResult.appendLog("Updating " + targetFilePath, "INFO");
-            sftpChannel.put(inputStream, targetFilePath);
+            updateResult.appendLog("Updating " + targetFile, "INFO");
+            sftpChannel.put(inputStream, targetFile);
         }
 
         sftpChannel.exit();
@@ -100,53 +101,35 @@ public class EarDeployer implements AutoCloseable {
         }
     }
 
-
-    private void updateFolder(ApplicationFile applicationFile,AppUpdaterConfig appUpdaterConfig,String earName ,Set<String> archiveFiles ,final String tempFolder ,final String extension, String newFileName) throws IOException, JSchException, SftpException, InterruptedException {
-        String archivePath = appUpdaterConfig.getDeployOn().getTempPath() + "/tempFolder/" +
-                applicationFile.getPath().substring(0,
-                        applicationFile.getPath().indexOf(extension) + 4);
-        String archiveName = archivePath.substring(archivePath.lastIndexOf("/") + 1);
-        String archiveFolderName = archiveName.contains(".") ? archiveName.substring(0, archiveName.indexOf(".")) : earName.substring(0, earName.indexOf("."));
-        String tempFolderArchive = extension.equals(".jar") ? "tempFolderJar" : "tempFolderWar";
-
-        if (!archiveFiles.contains(archiveFolderName)) {
-            updateResult.appendLog("Extracting the " + archiveFolderName + extension, "INFO");
-            executeCommand("mkdir %s/%s",false,null,appUpdaterConfig.getDeployOn().getTempPath(),tempFolder);
-
-            updateResult.appendLog("Copying the " + archiveFolderName + extension + " to the temp folder", "INFO");
-            executeCommand("unzip %s -d %s/%s/%s",false,null ,archivePath, appUpdaterConfig.getDeployOn().getTempPath(),tempFolder, archiveFolderName);
-            archiveFiles.add(archiveFolderName);
+    private void updateFile(ApplicationFile applicationFile) throws IOException, JSchException, SftpException, InterruptedException {
+        if(!archives.contains(applicationFile.getPath())) {
+            extractArchive(applicationFile);
         }
-        writeFile(applicationFile, appUpdaterConfig.getDeployOn().getTempPath() + "/" + tempFolderArchive + "/" + archiveFolderName + "/" + newFileName);
+
+        writeFile(applicationFile);
     }
 
-    private void packageArchive(AppUpdaterConfig appUpdaterConfig,Set<String> archiveFiles , final String extension) throws JSchException, IOException, InterruptedException {
-        String tempFolderArchive = extension.equals(".jar") ? "tempFolderJar" : "tempFolderWar";
-        for (String archive : archiveFiles) {
-            updateResult.appendLog("Zipping the " + archive + extension, "INFO");
-            executeCommand("cd %s/%s/%s && zip -r %s/tempFolder/%s *",false,null
-                    ,appUpdaterConfig.getDeployOn().getTempPath()
-                    ,tempFolderArchive, archive, appUpdaterConfig.getDeployOn().getTempPath(), archive + extension);
-
-            updateResult.appendLog("Clearing the " + archive + extension + " temp folder", "INFO");
-            executeCommand("find %s/%s -mindepth 1 -exec rm -rf {} +",false,null
-                    ,appUpdaterConfig.getDeployOn().getTempPath(),tempFolderArchive);
-        }
-    }
-
-    private void updateFile(ApplicationFile applicationFile, String earName) throws IOException, JSchException, SftpException, InterruptedException {
-        AppUpdaterConfig appUpdaterConfig = applicationFile.getAppUpdaterConfig();
-        String newFileName = applicationFile.getPath().contains("/") ?
-                applicationFile.getPath().substring(applicationFile.getPath().lastIndexOf("/") + 1)
-                : applicationFile.getPath();
-
-        if (applicationFile.getPath().contains(".jar")) {
-            updateFolder(applicationFile,appUpdaterConfig, earName,jarFiles, "tempFolderJar", ".jar", newFileName);
-        } else if (applicationFile.getPath().contains(".war")) {
-            updateFolder(applicationFile,appUpdaterConfig, earName,warFiles, "tempFolderWar", ".war", newFileName);
+    private void extractArchive(ApplicationFile applicationFile) throws JSchException, IOException, InterruptedException {
+        String tempFolder = appUpdaterConfig.getDeployOn().getTempPath();
+        String path = applicationFile.getPath();
+        String archive;
+        if(path.contains(".jar")){
+            archive = tempFolder + "/ear/" + path.substring(0, path.indexOf(".jar")) + ".jar";
+        } else if (path.contains(".war")){
+            archive = tempFolder + "/ear/" +  path.substring(0, path.indexOf(".war")) + ".war";
         } else {
-            writeFile(applicationFile, appUpdaterConfig.getDeployOn().getTempPath() + "/tempFolder/" + newFileName );
+            return;
         }
+
+        String fileName = archive.substring(archive.lastIndexOf("/") + 1);
+
+        archives.add(archive);
+
+        String tempArchive = tempFolder + "/" + fileName;
+        executeCommand("unzip %s -d %s",false,null
+                ,archive, tempArchive);
+        executeCommand("rm -fr %s",false,null, archive);
+        executeCommand("mv %s %s",false,null, tempArchive, archive);
     }
 
 
@@ -169,33 +152,49 @@ public class EarDeployer implements AutoCloseable {
         executeCommand(appUpdaterConfig.getToBeDeployed().getEarCommand(appUpdaterConfig.getDeployOn().getEarPath()),false,null);
 
         // Extract the ear
+        updateResult.appendLog("Clearing the temp folder", "INFO");
+        executeCommand("rm -rf %s/*",false,null
+                ,appUpdaterConfig.getDeployOn().getTempPath());
         updateResult.appendLog("Extracting the " + earName.substring(earName.lastIndexOf(".") + 1 ) + " file", "INFO");
-        executeCommand("unzip %s -d %s/tempFolder",false,null
+        executeCommand("unzip %s -d %s",false,null
                 , appUpdaterConfig.getDeployOn().getEarPath()
-                , appUpdaterConfig.getDeployOn().getTempPath());
+                , appUpdaterConfig.getDeployOn().getTempPath() + "/ear/");
+        executeCommand("rm -rf %s",false,null
+                ,appUpdaterConfig.getDeployOn().getEarPath());
+
 
         for (ApplicationFile applicationFile : appUpdaterConfig.getApplicationFiles()) {
-            updateFile(applicationFile,earName);
+            applicationFile.setPath(applicationFile.getPath().replace("\\","/"));
+            updateFile(applicationFile);
         }
 
-        packageArchive(appUpdaterConfig,jarFiles,".jar");
-
-        packageArchive(appUpdaterConfig,warFiles,".war");
+        packageArchives();
 
         // Zip the new ear
         updateResult.appendLog("Zipping the new " + earName.substring(earName.lastIndexOf(".")), "INFO");
-        executeCommand("cd %s/tempFolder && zip -r %s *",false,null
-                ,appUpdaterConfig.getDeployOn().getTempPath()
-                , appUpdaterConfig.getDeployOn().getEarPath());
+        executeCommand("cd %s/ear && zip -r %s *",false,null,
+                appUpdaterConfig.getDeployOn().getTempPath(),
+                appUpdaterConfig.getDeployOn().getEarPath());
 
         // Clear the temp folder
         updateResult.appendLog("Clearing the temp folder", "INFO");
-        executeCommand("find %s/tempFolder -mindepth 1 -exec rm -rf {} +",false,null
+        executeCommand("rm -rf %s/*",false,null
                 ,appUpdaterConfig.getDeployOn().getTempPath());
 
         executeCommands(appUpdaterConfig.getAfterUpdateCommands()
                 ,appUpdaterConfig.getDeployOn().getVirtualMachine().getPassword());
 
+    }
+
+    private void packageArchives() throws JSchException, IOException, InterruptedException {
+        for(String archive : archives){
+            String folderName = archive.substring(archive.lastIndexOf("/"));
+            String tempArchive = appUpdaterConfig.getDeployOn().getTempPath() + folderName;
+            executeCommand("cd %s && zip -r %s *",false,null
+                    ,archive, tempArchive);
+            executeCommand("rm -fr %s",false,null, archive);
+            executeCommand("mv %s %s",false,null, tempArchive, archive);
+        }
     }
 
 
