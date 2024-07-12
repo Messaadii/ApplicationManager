@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 public class RegularExpressionBasedURL extends URLBased{
     @Column(name = "regularExpression_")
     private String regularExpression;
+    @Column(name = "suffix_")
+    private String suffix;
 
     public String getRegularExpression() {
         return regularExpression;
@@ -22,6 +24,14 @@ public class RegularExpressionBasedURL extends URLBased{
 
     public void setRegularExpression(String regularExpression) {
         this.regularExpression = regularExpression;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
     }
 
     @Override
@@ -34,7 +44,7 @@ public class RegularExpressionBasedURL extends URLBased{
 
         List<String> matches = new ArrayList<>();
         while (matcher.find()) {
-            matches.add(matcher.group(1) + ".ear");
+            matches.add(matcher.group(1) + (suffix != null ? suffix : ""));
         }
         matches.sort(String::compareTo);
         return matches.getLast();
