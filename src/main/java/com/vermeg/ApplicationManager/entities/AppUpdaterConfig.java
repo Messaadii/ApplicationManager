@@ -1,5 +1,6 @@
 package com.vermeg.ApplicationManager.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import com.vermeg.ApplicationManager.helpers.EarDeployer;
@@ -11,24 +12,25 @@ import java.util.List;
 @Entity
 public class AppUpdaterConfig {
     @Id
+    @Column(name = "name_")
     private String name ;
-
-    @OneToMany(mappedBy = "appUpdaterConfigBefore",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "appUpdaterConfigBefore",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Command> beforeUpdateCommands ;
 
-    @OneToMany(mappedBy = "appUpdaterConfigAfter", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "appUpdaterConfigAfter", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Command> afterUpdateCommands ;
 
-    @OneToMany(mappedBy = "appUpdaterConfig", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "appUpdaterConfig", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicationFile> applicationFiles;
 
-    @OneToOne(mappedBy = "toBeDeployedAUC", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Resource toBeDeployed;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private VirtualMachineResource deployOn;
 
-    @OneToMany(mappedBy = "appUpdaterConfig" , cascade = CascadeType.REMOVE)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @OneToMany(mappedBy = "appUpdaterConfig", cascade = CascadeType.REMOVE)
     private List<UpdateResult> updateResults;
 
     public String getName() {

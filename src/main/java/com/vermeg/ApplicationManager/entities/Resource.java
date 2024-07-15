@@ -1,5 +1,6 @@
 package com.vermeg.ApplicationManager.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -23,10 +24,12 @@ import java.io.IOException;
 public abstract class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_")
+    @JsonIgnore
     private Integer id;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @OneToOne
+    @OneToOne(mappedBy = "toBeDeployed")
     private AppUpdaterConfig toBeDeployedAUC;
 
     public abstract String getEarCommand(String destinationPath) throws IOException;

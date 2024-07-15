@@ -1,5 +1,6 @@
 package com.vermeg.ApplicationManager.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
@@ -8,8 +9,12 @@ public class Command {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_")
+    @JsonIgnore
     private Integer id;
+    @Column(name = "command_")
     private String command ;
+    @Column(name = "runAsRoot_")
     private Boolean runAsRoot ;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne
