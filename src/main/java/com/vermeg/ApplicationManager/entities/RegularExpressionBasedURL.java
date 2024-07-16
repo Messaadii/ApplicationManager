@@ -13,18 +13,29 @@ import java.util.regex.Pattern;
 @Entity
 @DiscriminatorValue("RegularExpressionBasedURL")
 public class RegularExpressionBasedURL extends URLBased{
-    private String RegularExpression ;
+    @Column(name = "regularExpression_")
+    private String regularExpression;
+    @Column(name = "suffix_")
+    private String suffix;
 
     public String getRegularExpression() {
-        return RegularExpression;
+        return regularExpression;
     }
 
     public void setRegularExpression(String regularExpression) {
-        RegularExpression = regularExpression;
+        this.regularExpression = regularExpression;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
     }
 
     @Override
-    public String getUrl() throws IOException {
+    public String commandUrl() throws IOException {
         Document doc = Jsoup.connect(getUrl()).get();
         String input = doc.html();
 
@@ -33,7 +44,7 @@ public class RegularExpressionBasedURL extends URLBased{
 
         List<String> matches = new ArrayList<>();
         while (matcher.find()) {
-            matches.add(matcher.group());
+            matches.add(matcher.group(1) + (suffix != null ? suffix : ""));
         }
         matches.sort(String::compareTo);
         return matches.getLast();

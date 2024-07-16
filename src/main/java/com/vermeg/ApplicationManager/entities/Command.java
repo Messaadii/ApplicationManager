@@ -1,5 +1,6 @@
 package com.vermeg.ApplicationManager.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
@@ -9,8 +10,12 @@ import jakarta.persistence.*;
 public class Command {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @Column(name = "id_")
+    @JsonIgnore
+    private Long id;
+    @Column(name = "command_")
     private String command ;
+    @Column(name = "runAsRoot_")
     private Boolean runAsRoot ;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToOne
@@ -58,11 +63,11 @@ public class Command {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public VirtualMachine getVirtualMachine() {
+    public Virgit pushtualMachine getVirtualMachine() {
         return virtualMachine;
     }
 

@@ -13,20 +13,22 @@ import java.util.List;
 
 public class VirtualMachine {
     @Id
+    @Column(name = "name_")
     private String name;
+
+    @Column(name = "host_")
     private String host;
+    @Column(name = "user_")
     private String user;
     @OneToMany(mappedBy = "virtualMachine",cascade = CascadeType.ALL)
     private List<Command> commands;
-    @ColumnTransformer(
-            read = "CAST(AES_DECRYPT(FROM_BASE64(password), 'encryption_key') AS CHAR(255))",
-            write = "TO_BASE64(AES_ENCRYPT(?, 'encryption_key'))"
-    )
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "password_")
     private String password;
+    @Column(name = "port_")
     private int port;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @OneToMany(mappedBy = "virtualMachine", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "virtualMachine")
     private List<VirtualMachineResource> virtualMachineResources;
 
     public int getPort() {
