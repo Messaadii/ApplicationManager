@@ -5,9 +5,12 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnTransformer;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "virtual_machine")
+
 public class VirtualMachine {
     @Id
     @Column(name = "name_")
@@ -17,6 +20,8 @@ public class VirtualMachine {
     private String host;
     @Column(name = "user_")
     private String user;
+    @OneToMany(mappedBy = "virtualMachine",cascade = CascadeType.ALL)
+    private List<Command> commands;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password_")
     private String password;
@@ -29,6 +34,7 @@ public class VirtualMachine {
     public int getPort() {
         return port;
     }
+
     public void setPort(int port) {
         this.port = port;
     }
@@ -73,4 +79,19 @@ public class VirtualMachine {
         this.password = password;
     }
 
-}
+    public List<Command> getCommands() {
+        return commands;
+    }
+
+    public void setCommands(List<Command> commands) {
+        for(Command command : commands){
+            command.setVirtualMachine(this);
+        }
+        this.commands = commands;
+    }
+
+
+
+
+    }
+
