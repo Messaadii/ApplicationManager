@@ -2,6 +2,8 @@ package com.vermeg.ApplicationManager.services.impl;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
+import java.io.ByteArrayOutputStream;
+
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.vermeg.ApplicationManager.entities.Command;
@@ -168,11 +170,55 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     @Override
-    public void executeCommand(String name) {
+    public void executeCommand(Command command) throws JSchException, IOException {
+        VirtualMachine vm = command.getVirtualMachine();
+        if (vm == null) {
+            throw new IllegalArgumentException("Virtual Machine not found");
+        }
 
+        JSch jsch = new JSch();
+        Session session = jsch.getSession(vm.getUser(), vm.getHost(), vm.getPort());
+        session.setPassword(vm.getPassword());
+
+        // Enable verbose JSch logging
+        Properties config = new Properties();
+        config.put("StrictHostKeyChecking", "no");
+        config.put("PreferredAuthentications", "password");
+        session.setConfig(config);
+
+        try {
+            session.connect();
+
+            ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
+            channelExec.setCommand(command.getCommand());
+            channelExec.setInputStream(null);
+            channelExec.setErrStream(System.err);
+
+            InputStream in = channelExec.getInputStream();
+            channelExec.connect();
+
+            byte[] tmp = new byte[1024];
+            while (true) {
+                while (in.available() > 0) {
+                    int i = in.read(tmp, 0, 1024);
+                    if (i < 0) break;
+                    System.out.print(new String(tmp, 0, i));
+                }
+                if (channelExec.isClosed()) {
+                    if (in.available() > 0) continue;
+                    break;
+                }
+            }
+
+            channelExec.disconnect();
+        } finally {
+            if (session.isConnected()) {
+                session.disconnect();
+            }
+        }
     }
 
-    public void executeCommand(String name,Command command) throws IOException, InterruptedException, JSchException {
+    public String executeThreadDump(String name, String pid) throws InterruptedException, JSchException, IOException {
         VirtualMachine vm = findByName(name);
         if (vm == null) {
             throw new IllegalArgumentException("Virtual Machine not found");
@@ -181,39 +227,46 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         JSch jsch = new JSch();
         Session session = jsch.getSession(vm.getUser(), vm.getHost(), vm.getPort());
         session.setPassword(vm.getPassword());
-        session.setConfig("StrictHostKeyChecking", "no");
-        session.connect();
 
-        ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-        channelExec.setCommand(command.getCommand());
-        channelExec.setInputStream(null);
-        channelExec.setErrStream(System.err);
+        // Enable verbose JSch logging
+        Properties config = new Properties();
+        config.put("StrictHostKeyChecking", "no");
+        config.put("PreferredAuthentications", "password");
+        session.setConfig(config);
 
-        InputStream in = channelExec.getInputStream();
-        channelExec.connect();
+        try {
+            session.connect();
+            ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
+            String command = "jstack " + pid; // Command to generate thread dump
+            channelExec.setCommand(command);
+            channelExec.setInputStream(null);
+            channelExec.setErrStream(System.err);
 
-        byte[] tmp = new byte[1024];
-        while (true) {
-            while (in.available() > 0) {
-                int i = in.read(tmp, 0, 1024);
-                if (i < 0) break;
-                System.out.print(new String(tmp, 0, i));
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            InputStream in = channelExec.getInputStream();
+            channelExec.connect();
+
+            byte[] tmp = new byte[1024];
+            while (true) {
+                while (in.available() > 0) {
+                    int i = in.read(tmp, 0, 1024);
+                    if (i < 0) break;
+                    outputStream.write(tmp, 0, i);
+                }
+                if (channelExec.isClosed()) {
+                    if (in.available() > 0) continue;
+                    break;
+                }
+
             }
-            if (channelExec.isClosed()) {
-                if (in.available() > 0) continue;
-                break;
+
+            channelExec.disconnect();
+            return outputStream.toString();
+        } finally {
+            if (session.isConnected()) {
+                session.disconnect();
             }
-            Thread.sleep(1000);
         }
-
-        channelExec.disconnect();
-        session.disconnect();
     }
-
-    @Override
-    public Command addcommand(Command command) {
-        return null;
-    }
-
 
 }

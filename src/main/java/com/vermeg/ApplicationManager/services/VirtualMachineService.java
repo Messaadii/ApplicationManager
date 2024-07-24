@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.List;
 
 public interface VirtualMachineService {
+    static void executeCommand(String name, String pid) {
+    }
+
     VirtualMachine create(VirtualMachine virtualMachine);
     VirtualMachine getVirtualMachine(String name);
     List<VirtualMachine> getAllVirtualMachines();
@@ -16,13 +19,8 @@ public interface VirtualMachineService {
     List<VirtualMachine> findAll();
     String killProcess(String name, String pid);
     List<Command> getCommandsByVirtualMachineName(String name);
-
-
     VirtualMachine findByName(String name);
+    void executeCommand(Command command) throws JSchException, IOException;
 
-    void executeCommand(String name);
-
-    void executeCommand(String name, Command command) throws JSchException, IOException, InterruptedException;
-
-    Command addcommand(Command command);
+    String executeThreadDump(String name, String pid) throws IOException, InterruptedException, JSchException;
 }

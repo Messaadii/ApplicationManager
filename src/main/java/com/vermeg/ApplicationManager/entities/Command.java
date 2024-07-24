@@ -11,7 +11,7 @@ public class Command {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     @Column(name = "command_")
     private String command ;
@@ -67,7 +67,7 @@ public class Command {
         this.id = id;
     }
 
-    public Virgit pushtualMachine getVirtualMachine() {
+    public VirtualMachine getVirtualMachine() {
         return virtualMachine;
     }
 

@@ -15,12 +15,11 @@ public class VirtualMachine {
     @Id
     @Column(name = "name_")
     private String name;
-
     @Column(name = "host_")
     private String host;
     @Column(name = "user_")
     private String user;
-    @OneToMany(mappedBy = "virtualMachine",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "virtualMachine",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Command> commands;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password_")
