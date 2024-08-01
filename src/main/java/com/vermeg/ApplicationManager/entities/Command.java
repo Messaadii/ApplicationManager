@@ -67,8 +67,8 @@ public class Command {
         this.id = id;
     }
 
-    public Virgit pushtualMachine getVirtualMachine() {
-        return virtualMachine;
+    public VirtualMachine  getVirtualMachine() {
+        return virtualMachine ;
     }
 
     public void setVirtualMachine(VirtualMachine virtualMachine) {

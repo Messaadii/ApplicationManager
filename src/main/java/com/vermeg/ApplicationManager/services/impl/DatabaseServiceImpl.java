@@ -17,6 +17,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,7 +30,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     @Transactional
-    public Database save(Database database){
+    public Database save(Database database) {
         return databaseRepository.save(database);
     }
 
@@ -126,15 +127,17 @@ public class DatabaseServiceImpl implements DatabaseService {
         executedQuery.setQuery(query);
         return executedQuery;
     }
+
     @Override
     @Transactional
-    public void delete(String aleas) {
-        databaseRepository.deleteById(aleas);
+    public void delete(String alias) {
+        databaseRepository.deleteById(alias);
     }
+
     @Override
     @Transactional
-    public Database update(String aleas, Database database) {
-        Database existingDatabase = findById(aleas);
+    public Database update(String alias, Database database) {
+        Database existingDatabase = findById(alias);
         existingDatabase.setName(database.getName());
         existingDatabase.setHost(database.getHost());
         existingDatabase.setPort(database.getPort());
@@ -143,9 +146,16 @@ public class DatabaseServiceImpl implements DatabaseService {
         existingDatabase.setPassword(database.getPassword());
         return databaseRepository.save(existingDatabase);
     }
+
     @Override
     @Transactional(readOnly = true)
-    public Database findById(String aleas) {
-        return databaseRepository.findById(aleas).orElseThrow(() -> new RuntimeException("Database not found with id: " + aleas));
+    public Database findById(String alias) {
+        return databaseRepository.findById(alias).orElseThrow(() -> new RuntimeException("Database not found with id: " + alias));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Database> findAll() {
+        return databaseRepository.findAll();
     }
 }
